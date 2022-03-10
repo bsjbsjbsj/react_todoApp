@@ -9,6 +9,7 @@ function ToDoItemList({ title, todoList, setTodoList, checkedList }) {
       <ul className="todoapp_list-ul">
         {todoList &&
           todoList.map(todoItem => {
+            if (todoItem.deleted) return null;
             if (checkedList !== todoItem.checked) return null;
             return (
               <ToDoItem

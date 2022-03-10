@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 function ToDoItem({ todoItem, todoList, setTodoList }) {
   const [edited, setEdited] = useState(false);
-  // const [newText, setNewText] = useState(todoItem.text);
+  const [newText, setNewText] = useState(todoItem.text);
+  const onChangeInput = e => setNewText(e.target.value);
+  const editInputRef = useRef(null);
   let editButton;
+
+  useEffect(() => {
+    if (edited) {
+      editInputRef.current.focus();
+    }
+  }, [edited]);
 
   const onChangeCheckbox = () => {
     const nextTodoList = todoList.map(item => ({
@@ -15,7 +23,27 @@ function ToDoItem({ todoItem, todoList, setTodoList }) {
   };
 
   const onClickEditButton = () => {
-    setEdited(true);
+    if (!edited) {
+      setEdited(true);
+    } else {
+      const nextTodoList = todoList.map(item => ({
+        ...item,
+        text: item.id === todoItem.id ? newText : item.text,
+      }));
+      console.log(todoItem.id);
+      setTodoList(nextTodoList);
+      setEdited(false);
+    }
+  };
+
+  const onClickDeleteButton = () => {
+    if (window.confirm('정말로 지우실건가요?')) {
+      const nextTodoList = todoList.map(item => ({
+        ...item,
+        deleted: item.id === todoItem.id ? true : item.deleted,
+      }));
+      setTodoList(nextTodoList);
+    }
   };
 
   // editButton
@@ -32,7 +60,11 @@ function ToDoItem({ todoItem, todoList, setTodoList }) {
       );
     } else {
       editButton = (
-        <button type="button" className="todoapp__item-edit-btn">
+        <button
+          type="button"
+          className="todoapp__item-edit-btn"
+          onClick={onClickEditButton}
+        >
           👌
         </button>
       );
@@ -54,10 +86,25 @@ function ToDoItem({ todoItem, todoList, setTodoList }) {
           todoItem.checked ? 'todoapp__item-ctx-checked' : 'todoapp__item-ctx'
         }`}
       >
-        {todoItem.text}
+        {!edited ? (
+          todoItem.text
+        ) : (
+          <input
+            type="text"
+            value={newText}
+            onChange={onChangeInput}
+            ref={editInputRef}
+          />
+        )}
       </span>
+
       {editButton}
-      <button type="button" className="todoapp__item-delete-btn">
+
+      <button
+        type="button"
+        className="todoapp__item-delete-btn"
+        onClick={onClickDeleteButton}
+      >
         🗑
       </button>
     </li>
